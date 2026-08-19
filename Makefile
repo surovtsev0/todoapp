@@ -19,13 +19,19 @@ env-cleanup:
 		echo "pgdata removal aborted"; \
 	fi
 
+env-port-forward:
+	@docker compose up -d port-forwarder
+
+env-port-close:
+	@docker compose down port-forwarder
+
 migrate-create:
 	@if [ -z "$(seq)" ]; then \
 		echo "SEQ is not set. Cannot run migrations. Example: make migrate-create seq=init"; \
 		exit 1; \
 	fi
 
-	docker compose run --rm todoapp-postgres-migrate \
+	@docker compose run --rm todoapp-postgres-migrate \
 		create \
 		-ext sql \
 		-dir /migrations \
@@ -40,5 +46,5 @@ migrate-down:
 migrate-action:
 	@docker compose run --rm todoapp-postgres-migrate \
 	-path /migrations \
-	-database postgres://${POSTGRES_USER}:$(POSTGRES_PASSWORD)@todoapp-postgres:5432/${POSTGRES_DB}&sslmode=disable \
+	-database postgres://${POSTGRES_USER}:$(POSTGRES_PASSWORD)@todoapp-postgres:5432/${POSTGRES_DB}?sslmode=disable \
 	"$(action)"
